@@ -40,5 +40,6 @@ func searchByAccountId(account_id string) {
 	if err := json.Unmarshal(body, &prof); err != nil {
 		panic(err)
 	}
+
 	fmt.Println(prof.ComputedMmr)
 }
