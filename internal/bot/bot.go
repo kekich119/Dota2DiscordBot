@@ -1,7 +1,7 @@
 package bot
 
 import (
-	"dota/app/internal/opendota"
+	cmd "dota/app/internal/bot/commands"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -90,18 +90,7 @@ func interactionCreate(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	switch i.ApplicationCommandData().Name {
 
 	case "profile":
-		options := i.ApplicationCommandData().Options
-
-		accountID := options[0].StringValue()
-
-		profile := opendota.SearchByAccountId(accountID)
-
-		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: fmt.Sprintf("%f", profile.ComputedMmr),
-			},
-		})
+		cmd.CommandShowProfile(s, i)
 
 	}
 }
