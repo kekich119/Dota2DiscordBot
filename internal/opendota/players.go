@@ -10,7 +10,7 @@ import (
 var accountsByPersonalName AccountByPersonalName
 var prof Dotka
 
-func searchAccountIdByPersonalName(personalName string) {
+func SearchAccountIdByPersonalName(personalName string) {
 	response, err := http.Get("https://api.opendota.com/api/search?q=" + personalName)
 	if err != nil {
 		panic(err)
@@ -27,7 +27,7 @@ func searchAccountIdByPersonalName(personalName string) {
 	fmt.Print(accountsByPersonalName)
 }
 
-func searchByAccountId(account_id string) {
+func SearchByAccountId(account_id string) (profile Dotka) {
 	resp, err := http.Get("https://api.opendota.com/api/players/" + account_id)
 	if err != nil {
 		panic(err)
@@ -42,4 +42,5 @@ func searchByAccountId(account_id string) {
 	}
 
 	fmt.Println(prof.ComputedMmr)
+	return prof
 }

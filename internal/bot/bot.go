@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"dota/app/internal/opendota"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -10,21 +11,29 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-var token string
+type token struct {
+	Token string `json:"token"`
+}
+
+var commands []*discordgo.ApplicationCommand
 
 func Start() {
 
-	file, _ := os.ReadFile("token.json")
+	var Token token
+	file, err := os.ReadFile("internal/bot/token.json")
+	if err != nil {
+		panic(err)
+	}
 
-	json.Unmarshal(file, token)
+	json.Unmarshal(file, &Token)
 
-	discord, err := discordgo.New("Bot " + token)
+	discord, err := discordgo.New("Bot " + Token.Token)
 	if err != nil {
 		fmt.Println("Error: ", err)
 		return
 	}
 
-	discord.AddHandler(messageCreate)
+	discord.AddHandler(interactionCreate)
 
 	discord.Identify.Intents = discordgo.IntentsGuildMessages
 
@@ -32,6 +41,28 @@ func Start() {
 	if err != nil {
 		fmt.Print(err)
 		return
+	}
+
+	commands = []*discordgo.ApplicationCommand{
+		{
+			Name:        "profile",
+			Description: "Показать профиль игрока",
+		},
+		{
+			Name:        "hello",
+			Description: "hello",
+		},
+	}
+
+	for _, cmd := range commands {
+		_, err := discord.ApplicationCommandCreate(
+			discord.State.User.ID,
+			"",
+			cmd,
+		)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 
 	fmt.Println("Bot is now running. Press CTRL-C to exit.")
@@ -42,37 +73,20 @@ func Start() {
 	discord.Close()
 }
 
-func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
-	channelID := "1523759908409966795"
-	guildID := "1523759906920992938"
+func interactionCreate(s *discordgo.Session, i *discordgo.InteractionCreate) {
 
-	if m.Author.ID == s.State.User.ID {
+	if i.Type != discordgo.InteractionApplicationCommand {
 		return
 	}
-	if m.Content == "!ping" {
-		s.ChannelMessageSend(m.ChannelID, "Pong!")
-	}
-	if m.Content == "!join" {
-		connectToVoice(guildID, channelID, false, false, s)
+	switch i.ApplicationCommandData().Name {
+
+	case "profile":
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Content: opendota.SearchByAccountId("1694369470").Profile.Personaname,
+			},
+		})
 
 	}
-
-}
-
-func connectToVoice(guildId string, channelId string, mute bool, deaf bool, s *discordgo.Session) {
-	vc, err := s.ChannelVoiceJoin(guildId, channelId, mute, deaf)
-
-	if err != nil {
-		fmt.Println("ERROR: ", err)
-		return
-	}
-	audio, err := os.ReadFile("01 - Семнадцать ножевых.mp3")
-	if err != nil {
-		fmt.Println("ERROR", err)
-		return
-	}
-	vc.OpusSend <- audio
-
-	fmt.Println("Bot connected into channel: ", vc.ChannelID)
-
 }
