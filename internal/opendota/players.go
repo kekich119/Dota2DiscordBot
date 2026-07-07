@@ -35,10 +35,12 @@ func SearchByAccountId(account_id string) (profile Dotka) {
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return
 	}
 	if err := json.Unmarshal(body, &prof); err != nil {
-		panic(err)
+		fmt.Println(err)
+		return
 	}
 
 	fmt.Println(prof.ComputedMmr)

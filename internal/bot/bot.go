@@ -47,6 +47,14 @@ func Start() {
 		{
 			Name:        "profile",
 			Description: "Показать профиль игрока",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "account_id",
+					Description: "ID Аккаунта в доте",
+					Required:    true,
+				},
+			},
 		},
 		{
 			Name:        "hello",
@@ -78,13 +86,20 @@ func interactionCreate(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	if i.Type != discordgo.InteractionApplicationCommand {
 		return
 	}
+
 	switch i.ApplicationCommandData().Name {
 
 	case "profile":
+		options := i.ApplicationCommandData().Options
+
+		accountID := options[0].StringValue()
+
+		profile := opendota.SearchByAccountId(accountID)
+
 		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
-				Content: opendota.SearchByAccountId("1694369470").Profile.Personaname,
+				Content: fmt.Sprintf("%f", profile.ComputedMmr),
 			},
 		})
 
