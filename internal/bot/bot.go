@@ -1,7 +1,7 @@
 package bot
 
 import (
-	cmd "dota/app/internal/bot/commands"
+	cmd "dota/app/internal/bot/commands/profile"
 	"encoding/json"
 	"fmt"
 	"os"

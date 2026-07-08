@@ -30,3 +30,25 @@ type AccountByPersonalName []struct {
 	LastMatchTime string  `json:"last_match_time"`
 	Similarity    float64 `json:"similarity"`
 }
+
+type Winrate struct {
+	Win  int `json:"win"`
+	Lose int `json:"lose"`
+}
+
+type HeroesPlayer []struct {
+	HeroID       int `json:"hero_id"`
+	LastPlayed   int `json:"last_played"`
+	Games        int `json:"games"`
+	Win          int `json:"win"`
+	WithGames    int `json:"with_games"`
+	WithWin      int `json:"with_win"`
+	AgainstGames int `json:"against_games"`
+	AgainstWin   int `json:"against_win"`
+}
+
+type Heroes []struct {
+	Name          string `json:"name"`
+	Id            int    `json:"id"`
+	LocalizedName string `json:"localized_name"`
+}

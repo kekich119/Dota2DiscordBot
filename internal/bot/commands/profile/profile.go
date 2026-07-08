@@ -1,12 +1,16 @@
 package commands
 
 import (
-	"dota/app/internal/opendota"
+	opendota "dota/app/internal/opendota"
+	"encoding/json"
 	"fmt"
 	"math"
+	"os"
 
 	"github.com/bwmarrin/discordgo"
 )
+
+var heroes opendota.Heroes
 
 func CommandShowProfile(s *discordgo.Session, i *discordgo.InteractionCreate) {
 
@@ -27,6 +31,9 @@ func CommandShowProfile(s *discordgo.Session, i *discordgo.InteractionCreate) {
 }
 
 func buildProfileEmbed(profile opendota.Dotka) *discordgo.MessageEmbed {
+	winrate := opendota.GetWinrateByAccountId(fmt.Sprint(profile.Profile.AccountID))
+	procentWin := float64(winrate.Win) / float64(winrate.Win+winrate.Lose) * 100
+
 	return &discordgo.MessageEmbed{
 		Title: profile.Profile.Personaname,
 		Color: 0x00BFFF,
@@ -35,14 +42,43 @@ func buildProfileEmbed(profile opendota.Dotka) *discordgo.MessageEmbed {
 		},
 		Fields: []*discordgo.MessageEmbedField{
 			{
-				Name:   "ПОТАНЦИАЛЬНЫЙ MMR",
+				Name:   "ПОТАНЦЕВАЛЬНЫЙ MMR",
 				Value:  fmt.Sprintf("%v", math.Round(profile.ComputedMmr)),
 				Inline: true,
 			},
 			{
-				Name:  "SteamId",
-				Value: fmt.Sprintf("%v", profile.Profile.Steamid),
+				Name:  "Steam",
+				Value: fmt.Sprintf("https://steamcommunity.com/profiles/%v", profile.Profile.Steamid),
+			},
+			{
+				Name:   "ПОБЕДЫ",
+				Value:  fmt.Sprintf("🟢 Win: %v", winrate.Win),
+				Inline: true,
+			},
+			{
+				Name:   "ПОРОЖЕНИЯ",
+				Value:  fmt.Sprintf("🔴 Lose: %v", winrate.Lose),
+				Inline: true,
+			},
+			{
+				Name:   "ПРОЦЕНТ ПОБЕД",
+				Value:  fmt.Sprintf("%.2f%%", math.Round(procentWin)),
+				Inline: true,
 			},
 		},
 	}
+}
+
+func getNameHeroesById(id int) (heroName string) {
+
+	file, err := os.ReadFile("heroes.json")
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	json.Unmarshal(file, &heroName)
+
+	return heroName
+
 }
